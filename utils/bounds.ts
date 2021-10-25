@@ -23,7 +23,7 @@ export function getBoundsFromTwoPoints(A: number[], B: number[]): Bounds {
     width = maxX - minX,
     height = maxY - minY,
     midX = minX + width / 2,
-    midY = minX + height / 2
+    midY = minY + height / 2
 
   return {
     minX,

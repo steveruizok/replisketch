@@ -1,13 +1,13 @@
 import { nanoid } from "nanoid"
-import { LineShape, ShapeType } from "types"
+import { DrawShape, ShapeType } from "types"
 import { ShapeUtil } from "./ShapeUtil"
 import { rep } from "frontend/replicache"
 import { getSvgPathFromStroke } from "utils/getSvgPathFromStroke"
 import getStroke from "perfect-freehand"
 import { getBoundsFromPoints } from "utils/bounds"
 
-export class Line extends ShapeUtil<LineShape> {
-  type = ShapeType.Line as const
+export class Draw extends ShapeUtil<DrawShape> {
+  type = ShapeType.Draw as const
 
   defaultShape() {
     const order = rep.scan({ prefix: "shape/" }).keys.length
@@ -20,7 +20,7 @@ export class Line extends ShapeUtil<LineShape> {
     }
   }
 
-  render({ shape }: { shape: LineShape }) {
+  Component({ shape }: { shape: DrawShape }) {
     return (
       <path
         d={getSvgPathFromStroke(getStroke(this.getPairs(shape)))}
@@ -29,11 +29,11 @@ export class Line extends ShapeUtil<LineShape> {
     )
   }
 
-  getBounds(shape: LineShape) {
+  getBounds(shape: DrawShape) {
     return getBoundsFromPoints(this.getPairs(shape))
   }
 
-  private getPairs(shape: LineShape) {
+  private getPairs(shape: DrawShape) {
     const { points } = shape
 
     const pairs: number[][] = []

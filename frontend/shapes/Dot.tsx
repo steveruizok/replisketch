@@ -20,7 +20,7 @@ export class Dot extends ShapeUtil<DotShape> {
     }
   }
 
-  render({ shape }: { shape: DotShape }) {
+  Component({ shape }: { shape: DotShape }) {
     const { x, y } = shape
 
     return <circle cx={x} cy={y} r={8} fill="black" />

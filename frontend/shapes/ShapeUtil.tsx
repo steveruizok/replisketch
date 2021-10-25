@@ -7,7 +7,7 @@ export abstract class ShapeUtil<T extends Shape> {
 
   abstract defaultShape(): T
 
-  abstract render(props: { shape: T }): JSX.Element
+  abstract Component(props: { shape: T }): JSX.Element
 
   abstract getBounds(shape: T): Bounds
 

@@ -1,6 +1,7 @@
 import { Shape, ShapeType } from "types"
 import { Dot } from "./Dot"
-import { Line } from "./Line"
+import { Draw } from "./Draw"
+import { Rect } from "./Rect"
 import { ShapeUtil } from "./ShapeUtil"
 
 /**
@@ -8,7 +9,8 @@ import { ShapeUtil } from "./ShapeUtil"
  */
 export const shapeUtils: Record<ShapeType, ShapeUtil<Shape>> = {
   [ShapeType.Dot]: new Dot(),
-  [ShapeType.Line]: new Line(),
+  [ShapeType.Draw]: new Draw(),
+  [ShapeType.Rect]: new Rect(),
 }
 
 /**

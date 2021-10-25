@@ -1,8 +1,11 @@
 import { JSONObject, ReadonlyJSONObject } from "replicache"
 
+/* --------------------- Shapes --------------------- */
+
 export enum ShapeType {
   Dot = "dot",
-  Line = "line",
+  Draw = "draw",
+  Rect = "rect",
 }
 
 interface BaseShape extends JSONObject, ReadonlyJSONObject {
@@ -17,12 +20,27 @@ export interface DotShape extends BaseShape {
   y: number
 }
 
-export interface LineShape extends BaseShape {
-  type: ShapeType.Line
+export interface DrawShape extends BaseShape {
+  type: ShapeType.Draw
   points: number[]
 }
 
-export type Shape = LineShape | DotShape
+export interface RectShape extends BaseShape {
+  type: ShapeType.Rect
+  point: number[]
+  size: number[]
+}
+
+export type Shape = DrawShape | DotShape | RectShape
+
+/* ---------------------- Tools --------------------- */
+
+export enum ToolType {
+  Select = "select",
+  Eraser = "eraser",
+  Draw = "draw",
+  Rect = "rect",
+}
 
 export type ShapeData = {
   id: string
