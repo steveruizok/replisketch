@@ -1,11 +1,11 @@
 import styled from "styled-components"
 import * as React from "react"
+import Vec from "@tldraw/vec"
+import getStroke from "perfect-freehand"
 import { Shape, ShapeType } from "types"
 import { usePusher } from "frontend/usePusher"
 import { getShapeUtils } from "frontend/shapes"
 import { getSvgPathFromStroke } from "utils/getSvgPathFromStroke"
-import getStroke from "perfect-freehand"
-import Vec from "@tldraw/vec"
 import { Canvas } from "./Canvas"
 import { rep } from "frontend/replicache"
 import {
@@ -37,14 +37,17 @@ export function Editor() {
 
   const handlePointerDown = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (rState.current.type === "idle") {
-        const point = Vec.round([e.clientX, e.clientY])
-        rState.current = {
-          type: "pointing",
-          origin: point,
+      e.currentTarget.setPointerCapture(e.pointerId)
+
+      const state = rState.current
+      switch (state.type) {
+        case "idle": {
+          const point = Vec.round([e.clientX, e.clientY])
+          rState.current = {
+            type: "pointing",
+            origin: point,
+          }
         }
-      } else {
-        rState.current = { type: "idle" }
       }
     },
     []
@@ -56,27 +59,32 @@ export function Editor() {
       const currentPath = rCurrentPath.current
       const state = rState.current
 
-      if (state.type === "idle") {
-        return
-      } else if (state.type === "pointing") {
-        if (Vec.dist(point, state.origin) < 3) return
-
-        rState.current = {
-          ...state,
-          type: "dragging",
-          points: [state.origin, point],
+      switch (state.type) {
+        case "idle": {
+          return
         }
+        case "pointing": {
+          if (Vec.dist(point, state.origin) < 3) return
 
-        currentPath.setAttribute(
-          "d",
-          getSvgPathFromStroke(getStroke(rState.current.points))
-        )
-      } else if (state.type === "dragging") {
-        state.points.push(point)
-        currentPath.setAttribute(
-          "d",
-          getSvgPathFromStroke(getStroke(state.points))
-        )
+          const points = [state.origin, point]
+
+          rState.current = {
+            ...state,
+            type: "dragging",
+            points,
+          }
+
+          const stroke = getSvgPathFromStroke(getStroke(points))
+          currentPath.setAttribute("d", stroke)
+
+          break
+        }
+        case "dragging": {
+          state.points.push(point)
+          const stroke = getSvgPathFromStroke(getStroke(state.points))
+          currentPath.setAttribute("d", stroke)
+          break
+        }
       }
     },
     []
@@ -84,27 +92,34 @@ export function Editor() {
 
   const handlePointerUp = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+
       const state = rState.current
       const point = Vec.round([e.clientX, e.clientY])
 
-      if (state.type === "idle") {
-        return
-      } else if (state.type === "pointing") {
-        if (e.ctrlKey || e.metaKey) {
-          deleteShapesAtPoint(point)
-        } else {
-          getShapeUtils(ShapeType.Dot).create({
-            x: e.clientX,
-            y: e.clientY,
+      switch (state.type) {
+        case "idle": {
+          return
+        }
+        case "pointing": {
+          if (e.ctrlKey || e.metaKey) {
+            deleteShapesAtPoint(point)
+          } else {
+            getShapeUtils(ShapeType.Dot).create({
+              x: e.clientX,
+              y: e.clientY,
+            })
+          }
+          break
+        }
+        case "dragging": {
+          getShapeUtils(ShapeType.Line).create({
+            points: state.points.reduce((acc, cur) => {
+              acc.push(cur[0], cur[1])
+              return acc
+            }, [] as number[]),
           })
         }
-      } else {
-        getShapeUtils(ShapeType.Line).create({
-          points: state.points.reduce((acc, cur) => {
-            acc.push(cur[0], cur[1])
-            return acc
-          }, [] as number[]),
-        })
       }
 
       // Clear the client path

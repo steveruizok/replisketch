@@ -13,7 +13,7 @@ export const shapeUtils: Record<ShapeType, ShapeUtil<Shape>> = {
 
 /**
  * Get a shape utility by type.
- * @param type ShapeType
+ * @param type ShapeType | Shape
  */
 export function getShapeUtils<T extends Shape>(
   type: T | T["type"]

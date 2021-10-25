@@ -1,8 +1,8 @@
 import { db } from "backend/db"
 
-export async function initDb() {
-  // Reset the database and create the necessary tables.
+// Reset the database and create the necessary tables.
 
+export async function initDb() {
   await db.task(async (t) => {
     // Remove any pre-existing tables
     await t.none("DROP TABLE IF EXISTS shape")
