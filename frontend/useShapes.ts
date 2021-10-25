@@ -1,5 +1,5 @@
 import { useSubscribe } from "replicache-react"
-import { DotShape, LineShape, Shape } from "types"
+import { Shape } from "types"
 import { rep } from "./replicache"
 
 export function useShapes() {

@@ -1,20 +1,16 @@
 import { WriteTransaction } from "replicache"
 import { Mutation, Shape } from "types"
 
-type Mutators = {
+type MutMap = {
   [K in Mutation["name"]]: (
     tx: WriteTransaction,
-    args: Mutation["args"]
+    args: Extract<Mutation, { name: K }>["args"]
   ) => Promise<void>
 }
 
-export const mutators: Mutators = {
-  createShape: async (tx, shape: Shape) => {
+export const mutators: MutMap = {
+  createShape: async (tx, shape) => {
     await tx.put(`shape/${shape.id}`, shape)
-  },
-
-  deleteShape: async (tx, id: string) => {
-    await tx.del(`shape/${id}`)
   },
 
   updateShape: async (tx, changes: Partial<Shape>) => {
@@ -22,5 +18,9 @@ export const mutators: Mutators = {
     await tx
       .put(`shape/${changes.id}`, { ...prev, ...changes })
       .catch(console.warn)
+  },
+
+  deleteShape: async (tx, id: string) => {
+    await tx.del(`shape/${id}`)
   },
 }

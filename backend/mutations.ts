@@ -6,6 +6,8 @@ export async function handleMutation(mutation: Mutation, version: number) {
     case "createShape": {
       const shape = mutation.args
 
+      mutation.args
+
       await supabase.from("shape").insert({
         id: shape.id,
         shape,

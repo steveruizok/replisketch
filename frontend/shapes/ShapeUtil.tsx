@@ -23,7 +23,7 @@ export abstract class ShapeUtil<T extends Shape> {
   }
 
   async update(changes: Partial<T>) {
-    // rep.mutate.updateShape(changes)
+    rep.mutate.updateShape(changes)
   }
 
   async delete(id: string) {
