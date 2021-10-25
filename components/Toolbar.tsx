@@ -1,5 +1,5 @@
-import styled from "styled-components"
 import * as React from "react"
+import styled from "styled-components"
 import { Shape, ToolType } from "types"
 import { rep } from "frontend/replicache"
 import { tools } from "./tools"

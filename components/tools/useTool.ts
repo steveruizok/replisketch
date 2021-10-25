@@ -1,5 +1,5 @@
-import { deleteShapesAtPoint } from "frontend/actions"
 import * as React from "react"
+import { deleteShapesAtPoint } from "frontend/actions"
 import { ToolType } from "types"
 import { tools } from "."
 import { Tool } from "./Tool"
