@@ -1,13 +1,15 @@
 import { Shape, ShapeType } from "types"
+import { ShapeUtil } from "./ShapeUtil"
 import { Dot } from "./Dot"
 import { Draw } from "./Draw"
 import { Rect } from "./Rect"
-import { ShapeUtil } from "./ShapeUtil"
 
 /**
  * A mapping of shape types and their corresponding utilities
  */
-export const shapeUtils: Record<ShapeType, ShapeUtil<Shape>> = {
+export const shapeUtils: {
+  [K in ShapeType]: ShapeUtil<Extract<Shape, { type: K }>>
+} = {
   [ShapeType.Dot]: new Dot(),
   [ShapeType.Draw]: new Draw(),
   [ShapeType.Rect]: new Rect(),
@@ -17,10 +19,8 @@ export const shapeUtils: Record<ShapeType, ShapeUtil<Shape>> = {
  * Get a shape utility by type.
  * @param type ShapeType | Shape
  */
-export function getShapeUtils<T extends Shape>(
-  type: T | T["type"]
-): ShapeUtil<T> {
+export function getShapeUtils<T extends Shape>(type: T | T["type"]) {
   return (
-    typeof type === "string" ? shapeUtils[type] : shapeUtils[type["type"]]
+    typeof type === "string" ? shapeUtils[type] : shapeUtils[type.type]
   ) as ShapeUtil<T>
 }

@@ -1,5 +1,5 @@
+import * as React from "react"
 import { rep } from "frontend/replicache"
-import React from "react"
 import { Bounds, Shape, ShapeType } from "types"
 
 export abstract class ShapeUtil<T extends Shape> {
