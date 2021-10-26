@@ -1,6 +1,6 @@
 import * as React from "react"
 import styled from "styled-components"
-import { useShapes } from "frontend/useShapes"
+import { useShapes } from "./hooks/useShapes"
 import { RenderedShape } from "./RenderedShape"
 
 interface CanvasProps {

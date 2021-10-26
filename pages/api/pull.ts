@@ -15,6 +15,7 @@ type Patch =
 
 const PullHandler: NextApiHandler = async (req, res) => {
   const { clientID, cookie } = req.body
+  const { roomId } = req.query
 
   const version = cookie?.body?.version ?? 0
 
@@ -32,10 +33,11 @@ const PullHandler: NextApiHandler = async (req, res) => {
     const { body: changedShapes } = await supabase
       .from("shape")
       .select()
+      .eq("room_id", roomId)
       .gt("version", version)
 
     changedShapes.forEach((result: ShapeData) => {
-      const key = `shape/${result.shape.id}`
+      const key = `${roomId}/shape/${result.shape.id}`
       if (result.deleted) {
         patch.push({
           op: "del",

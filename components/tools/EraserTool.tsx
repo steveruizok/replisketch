@@ -1,5 +1,4 @@
 import Vec from "@tldraw/vec"
-import { deleteShapesAtPoint } from "frontend/actions"
 import { ToolType } from "types"
 import { Tool } from "./Tool"
 
@@ -37,7 +36,7 @@ export class EraserTool extends Tool {
           origin: point,
         }
 
-        deleteShapesAtPoint(point)
+        this.actions.deleteShapesAtPoint(point)
       }
     }
   }
@@ -55,7 +54,7 @@ export class EraserTool extends Tool {
           type: "dragging",
         }
 
-        deleteShapesAtPoint(point)
+        this.actions.deleteShapesAtPoint(point)
         break
       }
     }

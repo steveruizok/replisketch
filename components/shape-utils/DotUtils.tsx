@@ -1,32 +1,27 @@
 import { nanoid } from "nanoid"
 import { DotShape, ShapeType } from "types"
-import { ShapeUtil } from "./ShapeUtil"
-import { rep } from "frontend/replicache"
+import { ShapeUtils } from "./ShapeUtils"
 import { getBoundsAtPoint } from "utils/bounds"
 
-export class Dot extends ShapeUtil<DotShape> {
+export class DotUtils extends ShapeUtils<DotShape> {
   type = ShapeType.Dot as const
 
   defaultShape() {
-    const order = rep.scan({ prefix: "shape/" }).keys.length
-
     return {
       id: nanoid(),
       type: this.type,
-      x: 0,
-      y: 0,
-      order,
-      childIndex: order,
+      point: [0, 0],
+      childIndex: 1,
     }
   }
 
   Component({ shape }: { shape: DotShape }) {
-    const { x, y } = shape
+    const [x, y] = shape.point
 
     return <circle cx={x} cy={y} r={8} fill="black" />
   }
 
   getBounds(shape: DotShape) {
-    return getBoundsAtPoint([shape.x, shape.y], 16)
+    return getBoundsAtPoint(shape.point, 16)
   }
 }

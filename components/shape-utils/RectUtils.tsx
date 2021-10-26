@@ -1,22 +1,19 @@
 import { nanoid } from "nanoid"
 import { RectShape, ShapeType } from "types"
-import { ShapeUtil } from "./ShapeUtil"
-import { rep } from "frontend/replicache"
+import { ShapeUtils } from "./ShapeUtils"
 import { getBoundsFromTwoPoints } from "utils/bounds"
 import Vec from "@tldraw/vec"
 
-export class Rect extends ShapeUtil<RectShape> {
+export class RectUtils extends ShapeUtils<RectShape> {
   type = ShapeType.Rect as const
 
   defaultShape() {
-    const order = rep.scan({ prefix: "shape/" }).keys.length
-
     return {
       id: nanoid(),
       type: this.type,
       point: [0, 0],
       size: [100, 100],
-      childIndex: order,
+      childIndex: 1,
     }
   }
 

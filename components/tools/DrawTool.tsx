@@ -1,5 +1,4 @@
 import Vec from "@tldraw/vec"
-import { getShapeUtils } from "components/shapes"
 import getStroke from "perfect-freehand"
 import { ShapeType, ToolType } from "types"
 import { getSvgPathFromStroke } from "utils/getSvgPathFromStroke"
@@ -81,15 +80,13 @@ export class DrawTool extends Tool {
   }
 
   onPointerUp(e: React.PointerEvent<HTMLDivElement>, path: SVGPathElement) {
-    const point = Vec.round([e.clientX, e.clientY])
-
     switch (this.state.type) {
       case "idle": {
         return
       }
       case "pointing": {
         {
-          getShapeUtils(ShapeType.Dot).create({
+          this.getShapeUtils(ShapeType.Dot).create({
             x: e.clientX,
             y: e.clientY,
           })
@@ -97,11 +94,8 @@ export class DrawTool extends Tool {
         break
       }
       case "dragging": {
-        getShapeUtils(ShapeType.Draw).create({
-          points: this.state.points.reduce((acc, cur) => {
-            acc.push(cur[0], cur[1])
-            return acc
-          }, [] as number[]),
+        this.getShapeUtils(ShapeType.Draw).create({
+          points: this.state.points,
         })
       }
     }

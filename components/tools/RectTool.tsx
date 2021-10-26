@@ -1,5 +1,4 @@
 import Vec from "@tldraw/vec"
-import { getShapeUtils } from "components/shapes"
 import { ShapeType, ToolType } from "types"
 import { getBoundsAtPoint, getBoundsFromTwoPoints } from "utils/bounds"
 import { Tool } from "./Tool"
@@ -89,7 +88,7 @@ export class RectTool extends Tool {
         const point = Vec.round([e.clientX, e.clientY])
         const bounds = getBoundsAtPoint(point, 100)
 
-        getShapeUtils(ShapeType.Rect).create({
+        this.getShapeUtils(ShapeType.Rect).create({
           point: [bounds.minX, bounds.minY],
           size: [bounds.width, bounds.height],
         })
@@ -101,7 +100,7 @@ export class RectTool extends Tool {
           this.state.point
         )
 
-        getShapeUtils(ShapeType.Rect).create({
+        this.getShapeUtils(ShapeType.Rect).create({
           point: [bounds.minX, bounds.minY],
           size: [bounds.width, bounds.height],
         })

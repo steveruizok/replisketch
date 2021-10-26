@@ -1,26 +1,18 @@
-import { WriteTransaction } from "replicache"
-import { Mutation, Shape } from "types"
+import { Mutators, Shape } from "types"
 
-type MutMap = {
-  [K in Mutation["name"]]: (
-    tx: WriteTransaction,
-    args: Extract<Mutation, { name: K }>["args"]
-  ) => Promise<void>
-}
-
-export const mutators: MutMap = {
-  createShape: async (tx, shape) => {
-    await tx.put(`shape/${shape.id}`, shape)
+export const mutators: Mutators = {
+  createShape: async (tx, { roomId, shape }) => {
+    await tx.put(`${roomId}/shape/${shape.id}`, shape).catch(console.warn)
   },
 
-  updateShape: async (tx, changes: Partial<Shape>) => {
-    const prev = (await tx.get(`shape/${changes.id}`)) as Shape
+  updateShape: async (tx, { id, roomId, changes }) => {
+    const prev = (await tx.get(`${roomId}/${changes}`)) as Shape
     await tx
-      .put(`shape/${changes.id}`, { ...prev, ...changes })
+      .put(`${roomId}/shape/${id}`, { ...prev, ...changes })
       .catch(console.warn)
   },
 
-  deleteShape: async (tx, id: string) => {
-    await tx.del(`shape/${id}`)
+  deleteShape: async (tx, { roomId, id }) => {
+    await tx.del(`${roomId}/shape/${id}`).catch(console.warn)
   },
 }

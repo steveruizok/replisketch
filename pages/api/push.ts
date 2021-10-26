@@ -13,6 +13,7 @@ interface PushRequest extends NextApiRequest {
 
 const PushHandler: NextApiHandler = async (req: PushRequest, res) => {
   const { clientID, mutations } = req.body
+  const { roomId } = req.query
 
   try {
     const version = await getMaximumVersion()
@@ -40,7 +41,7 @@ const PushHandler: NextApiHandler = async (req: PushRequest, res) => {
     // Send a poke via Pusher so that other clients know to pull. We need
     // to await here otherwise, Next.js will frequently kill the request
     // and the poke won't get sent.
-    await sendPoke()
+    await sendPoke(roomId.toString())
 
     res.status(200).end()
   } catch (e) {
@@ -85,8 +86,8 @@ async function getLastMutationId(clientID: string) {
   return 0
 }
 
-async function sendPoke() {
-  await pusher.trigger("default", "poke", {})
+async function sendPoke(roomId: string) {
+  await pusher.trigger(roomId, "poke", {})
 }
 
 export default PushHandler

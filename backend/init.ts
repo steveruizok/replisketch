@@ -6,12 +6,20 @@ export async function initDb() {
   await db.task(async (t) => {
     // Remove any pre-existing tables
     await t.none("DROP TABLE IF EXISTS shape")
+    await t.none("DROP TABLE IF EXISTS room")
     await t.none("DROP TABLE IF EXISTS replicache_client")
     await t.none("DROP SEQUENCE IF EXISTS version")
+
+    // Create a table "room" to store rooms
+    await t.none(`CREATE TABLE room (
+      id VARCHAR (16) PRIMARY KEY NOT NULL,
+      url TEXT NOT NULL,
+      name TEXT NOT NULL)`)
 
     // Create a table "shape" to store shapes
     await t.none(`CREATE TABLE shape (
       id VARCHAR(21) PRIMARY KEY NOT NULL,
+      room_id VARCHAR(21) NOT NULL,
       shape JSON NOT NULL,
       deleted BOOLEAN NOT NULL,
       version BIGINT NOT NULL)`)

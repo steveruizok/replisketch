@@ -1,17 +1,20 @@
 import * as React from "react"
 import styled from "styled-components"
 import { Shape, ToolType } from "types"
-import { rep } from "frontend/replicache"
-import { tools } from "./tools"
+import { useRep } from "./hooks/useRep"
 
 interface ToolbarProps {
+  roomId: string
   selectedTool: ToolType
   onToolSelect: (tool: ToolType) => void
 }
 export const Toolbar = React.memo(function Canvas({
+  roomId,
   selectedTool,
   onToolSelect,
 }: ToolbarProps) {
+  const { rep, tools, actions } = useRep()
+
   const onToolClick = React.useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
       onToolSelect(e.currentTarget.id as ToolType)
@@ -20,8 +23,8 @@ export const Toolbar = React.memo(function Canvas({
   )
 
   const onClearClick = React.useCallback(() => {
-    deleteAllShapes()
-  }, [])
+    actions.deleteAllShapes()
+  }, [actions])
 
   return (
     <Container onPointerDown={killEvent}>
@@ -38,7 +41,8 @@ export const Toolbar = React.memo(function Canvas({
         )
       })}
       <Spacer />
-
+      <Title>Room ID: {roomId}</Title>
+      <Spacer />
       <Button onPointerDown={onClearClick}>Clear</Button>
     </Container>
   )
@@ -51,7 +55,10 @@ const Container = styled.div`
   border-bottom: 1px solid black;
   background-color: white;
   display: flex;
+  align-items: center;
   z-index: 2;
+  font-size: 13px;
+  font-weight: 500;
 `
 
 const Spacer = styled.div`
@@ -59,19 +66,15 @@ const Spacer = styled.div`
 `
 
 const Button = styled.button<{ isActive?: boolean }>`
+  font-size: inherit;
+  font-weight: inherit;
   background: none;
   height: 100%;
-  padding: 0 16px;
+  padding: 0 12px;
   border: none;
   text-decoration: ${({ isActive }) => (isActive ? "underline" : "none")};
 `
 
+const Title = styled.div``
+
 const killEvent = (e: React.PointerEvent) => e.stopPropagation()
-
-async function deleteAllShapes() {
-  const shapes = await rep.scan({ prefix: "shape/" }).values().toArray()
-
-  shapes.forEach((shape: Shape) => {
-    rep.mutate.deleteShape(shape.id)
-  })
-}

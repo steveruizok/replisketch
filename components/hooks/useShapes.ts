@@ -1,13 +1,14 @@
 import { useSubscribe } from "replicache-react"
 import { Shape } from "types"
-import { rep } from "./replicache"
+import { useRep } from "./useRep"
 
 export function useShapes() {
+  const { rep, roomId } = useRep()
   const shapes = useSubscribe(
     rep,
     async (tx) => {
       const list = (await tx
-        .scan({ prefix: "shape/" })
+        .scan({ prefix: `${roomId}/shape/` })
         .entries()
         .toArray()) as [string, Shape][]
 

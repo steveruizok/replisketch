@@ -1,21 +1,39 @@
 import * as React from "react"
 import styled from "styled-components"
-import { usePusher } from "frontend/usePusher"
 import { Canvas } from "./Canvas"
 import { Toolbar } from "./Toolbar"
 import { useTool } from "./hooks/useTool"
+import { useSetup, repContext } from "./hooks/useSetup"
 
-export function Editor() {
-  usePusher("default")
+export interface EditorProps {
+  roomId: string
+}
 
-  const { rCurrentPath, tool, onToolSelect, ...events } = useTool()
+export function Editor({ roomId }: EditorProps) {
+  const ctx = useSetup(roomId)
+
+  if (!ctx) return <div>Loading...</div>
+
+  return (
+    <repContext.Provider value={ctx}>
+      <WithContextEditor roomId={roomId} />
+    </repContext.Provider>
+  )
+}
+
+function WithContextEditor({ roomId }: EditorProps) {
+  const { rCurrentPath, selectedTool, onToolSelect, ...events } = useTool()
 
   return (
     <Container {...events}>
       <Canvas>
         <path ref={rCurrentPath} fill="black" />
       </Canvas>
-      <Toolbar selectedTool={tool} onToolSelect={onToolSelect} />
+      <Toolbar
+        roomId={roomId}
+        selectedTool={selectedTool}
+        onToolSelect={onToolSelect}
+      />
     </Container>
   )
 }
