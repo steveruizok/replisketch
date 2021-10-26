@@ -12,10 +12,7 @@ export async function deleteShapesAtPoint(this: ActionCtx, point: number[]) {
     Vec.add(point, [16, 16])
   )
 
-  const shapes = await this.rep
-    .scan({ prefix: `${this.roomId}/shape/` })
-    .values()
-    .toArray()
+  const shapes = this.live.get("shapes").toArray()
 
   shapes
     .filter((shape: Shape) => {
@@ -24,6 +21,6 @@ export async function deleteShapesAtPoint(this: ActionCtx, point: number[]) {
       return boundsCollide(bounds, eraser) || pointInBounds(point, bounds)
     })
     .forEach((shape: Shape) => {
-      this.rep.mutate.deleteShape({ roomId: this.roomId, id: shape.id })
+      this.live.get("shapes").delete(this.live.get("shapes").indexOf(shape))
     })
 }

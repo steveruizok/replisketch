@@ -18,16 +18,14 @@ export const Canvas = React.memo(function Canvas({ tempShape }: CanvasProps) {
       <Svg>
         <g transform={`translate(0,0)`}>
           <g id="shapes">
-            {shapes.map(([k, v]) => (
-              <RenderedShape key={k} shape={v} />
+            {shapes.map((shape) => (
+              <RenderedShape key={shape.id} shape={shape} />
             ))}
           </g>
-          {tempShape && !shapes.find(([id]) => id === tempShape.id) && (
-            <RenderedShape shape={tempShape} />
-          )}
+          {tempShape && <RenderedShape shape={tempShape} />}
         </g>
       </Svg>
-      <LiveCursors shapes={shapes} />
+      <LiveCursors />
     </>
   )
 })

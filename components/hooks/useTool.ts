@@ -1,4 +1,3 @@
-import { PresenceChannel } from "pusher-js"
 import * as React from "react"
 import { Shape, ToolType } from "types"
 import { throttle } from "utils/throttle"
@@ -33,7 +32,7 @@ method, and the newly selected tool will run its `onSelect` method.
 */
 
 export function useTool() {
-  const { tools, channel } = useCtx()
+  const { tools, room } = useCtx()
 
   const [tempShape, setTempShape] = React.useState<Shape | void | null>()
 
@@ -49,10 +48,12 @@ export function useTool() {
       const res = rSelectedTool.current.onPointerDown?.(e)
       if (res !== undefined) {
         setTempShape(res)
-        updateOnShapeChange(channel, res)
+        room.updatePresence({
+          tempShape: res,
+        })
       }
     },
-    [channel]
+    []
   )
 
   const onPointerMove = React.useCallback(
@@ -60,10 +61,12 @@ export function useTool() {
       const res = rSelectedTool.current.onPointerMove?.(e)
       if (res !== undefined) {
         setTempShape(res)
-        updateOnShapeChange(channel, res)
+        room.updatePresence({
+          tempShape: res,
+        })
       }
     },
-    [channel]
+    []
   )
 
   const onPointerUp = React.useCallback(
@@ -71,14 +74,13 @@ export function useTool() {
       e.currentTarget.releasePointerCapture(e.pointerId)
       const res = rSelectedTool.current.onPointerUp?.(e)
       setTempShape(null) // Always clear on pointer up
-
       if (res) {
-        // But maybe update the channel, too; and after waiting
-        // for the timeout to expire.
-        setTimeout(() => updateOnShapeChange(channel, res), 100)
+        room.updatePresence({
+          tempShape: null,
+        })
       }
     },
-    [channel]
+    []
   )
 
   const onToolSelect = React.useCallback(
@@ -101,12 +103,3 @@ export function useTool() {
     onPointerUp,
   }
 }
-
-const updateOnShapeChange = throttle(
-  (channel: PresenceChannel, tempShape: Shape | void | null) => {
-    channel.trigger("client-changed-temp-shape", {
-      tempShape,
-    })
-  },
-  110
-)

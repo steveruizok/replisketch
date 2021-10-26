@@ -4,14 +4,18 @@ import { Canvas } from "./Canvas"
 import { Toolbar } from "./Toolbar"
 import { useTool } from "./hooks/useTool"
 import { useSetup, repContext } from "./hooks/useSetup"
-import { LiveCursors } from "./LiveCursors"
-import { RenderedShape } from "./RenderedShape"
+import { createClient } from "@liveblocks/client"
+import { LiveblocksProvider, RoomProvider } from "@liveblocks/react"
 
 export interface EditorProps {
   roomId: string
 }
 
 export function Editor({ roomId }: EditorProps) {
+  return <WithRoomEditor roomId={roomId} />
+}
+
+function WithRoomEditor({ roomId }: EditorProps) {
   const ctx = useSetup(roomId)
 
   if (!ctx) return <div>Loading...</div>

@@ -1,23 +1,24 @@
-import { useSubscribe } from "replicache-react"
+import React from "react"
 import { Shape } from "types"
 import { useCtx } from "./useCtx"
 
 export function useShapes() {
-  const { rep, roomId } = useCtx()
-  const shapes = useSubscribe(
-    rep,
-    async (tx) => {
-      const list = (await tx
-        .scan({ prefix: `${roomId}/shape/` })
-        .entries()
-        .toArray()) as [string, Shape][]
+  const { live } = useCtx()
 
-      list.sort(([, { childIndex: a }], [, { childIndex: b }]) => a - b)
+  const [shapes, setShapes] = React.useState<Shape[]>([])
 
-      return list
-    },
-    []
-  )
+  React.useEffect(() => {
+    function handleChange() {
+      setShapes(live.get("shapes").toArray())
+    }
+
+    handleChange()
+    live.get("shapes").subscribe(handleChange)
+
+    return () => {
+      live.get("shapes").unsubscribe(handleChange)
+    }
+  }, [live])
 
   return { shapes }
 }

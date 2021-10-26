@@ -1,10 +1,5 @@
+import { LiveList, LiveObject } from "@liveblocks/client"
 import { GetShapeUtils } from "components/shape-utils"
-import {
-  JSONObject,
-  ReadonlyJSONObject,
-  Replicache,
-  WriteTransaction,
-} from "replicache"
 
 /* --------------------- Shapes --------------------- */
 
@@ -14,7 +9,7 @@ export enum ShapeType {
   Rect = "rect",
 }
 
-interface BaseShape extends JSONObject, ReadonlyJSONObject {
+interface BaseShape {
   id: string
   type: ShapeType
   point: number[]
@@ -57,27 +52,12 @@ export type ShapeData = {
   deleted: boolean
 }
 
-export type Mutation =
-  | { id: number; name: "createShape"; args: { roomId: string; shape: Shape } }
-  | { id: number; name: "deleteShape"; args: { roomId: string; id: string } }
-  | {
-      id: number
-      name: "updateShape"
-      args: { roomId: string; id: string; changes: Partial<Shape> }
-    }
-
-export type Mutators = {
-  [K in Mutation["name"]]: (
-    tx: WriteTransaction,
-    args: Extract<Mutation, { name: K }>["args"]
-  ) => Promise<void>
-}
-
-export type Rep = Replicache<Mutators>
+export type Live = LiveObject<{
+  shapes: LiveList<Shape>
+}>
 
 export type ActionCtx = {
-  rep: Rep
-  roomId: string
+  live: Live
   getShapeUtils: GetShapeUtils
 }
 

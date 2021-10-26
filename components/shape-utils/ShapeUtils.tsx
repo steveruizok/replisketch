@@ -1,9 +1,10 @@
-import { Bounds, Rep, Shape, ShapeType } from "types"
+import { LiveList } from "@liveblocks/client"
+import { Bounds, Live, Shape, ShapeType } from "types"
 
 export abstract class ShapeUtils<T extends Shape> {
   abstract type: ShapeType
 
-  constructor(protected rep: Rep, protected roomId: string) {}
+  constructor(protected live: Live, protected roomId: string) {}
 
   abstract defaultShape(): T
 
@@ -12,7 +13,7 @@ export abstract class ShapeUtils<T extends Shape> {
   abstract getBounds(shape: T): Bounds
 
   create(props: Partial<T>): T {
-    const order = this.rep.scan({ prefix: `${this.roomId}/shape/` }).keys.length
+    const order = this.live.get("shapes").length
 
     const shape: T = {
       ...this.defaultShape(),
@@ -20,22 +21,8 @@ export abstract class ShapeUtils<T extends Shape> {
       ...props,
     }
 
-    this.rep.mutate.createShape({ roomId: this.roomId, shape })
+    this.live.get("shapes").push(shape)
 
     return shape
-  }
-
-  update(shape: T, changes: Partial<T>): void
-  update(id: string, changes: Partial<T>): void
-  update(arg: T | string, changes: Partial<T>) {
-    const id = typeof arg === "string" ? arg : arg["id"]
-    this.rep.mutate.updateShape({ roomId: this.roomId, id, changes })
-  }
-
-  delete(shape: T): void
-  delete(id: string): void
-  delete(arg: T | string) {
-    const id = typeof arg === "string" ? arg : arg["id"]
-    this.rep.mutate.deleteShape({ roomId: this.roomId, id })
   }
 }

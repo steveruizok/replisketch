@@ -1,6 +1,6 @@
 import { ActionCtx, Shape } from "types"
 
 export async function createShape(this: ActionCtx, shape: Shape) {
-  this.rep.mutate.createShape({ roomId: this.roomId, shape })
+  this.live.get("shapes").push(shape)
   return shape
 }

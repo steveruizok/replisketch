@@ -1,9 +1,8 @@
 import * as React from "react"
-import { Replicache } from "replicache"
-import { Rep, Shape, ShapeType, ToolType } from "types"
+import { createClient, LiveList, Room } from "@liveblocks/client"
+import { Live, Shape, ShapeType, ToolType } from "types"
 import { DrawTool, EraserTool, RectTool, SelectTool, Tool } from "../tools"
 import { getActions } from "../actions"
-import { mutators } from "frontend/mutators"
 import {
   DotUtils,
   DrawUtils,
@@ -12,55 +11,58 @@ import {
   GetShapeUtils,
   ShapeUtilsMap,
 } from "components/shape-utils"
-import Pusher, { PresenceChannel } from "pusher-js"
+import { useStorage } from "@liveblocks/react"
+import { nanoid } from "nanoid"
 
 export type RepContext = {
-  rep: Rep
-  channel: PresenceChannel
+  roomId: string
+  room: Room
+  live: Live
   tools: {
     [K in ToolType]: Tool
   }
   getShapeUtils: GetShapeUtils
-  roomId: string
   actions: ReturnType<typeof getActions>
 }
 
 export const repContext = React.createContext<RepContext>({} as RepContext)
+
+const client = createClient({
+  publicApiKey: process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_API_KEY,
+})
 
 export function useSetup(roomId: string) {
   const [ctx, setCtx] = React.useState<RepContext | null>(null)
 
   React.useEffect(() => {
     if (ctx) return
-    ;(async () => {
-      // Connect Replicache
-      const PUSH_ENDPOINT = `/api/push?roomId=${roomId}`
-      const PULL_ENDPOINT = `/api/pull?roomId=${roomId}`
 
-      const rep = new Replicache({
-        pushURL: PUSH_ENDPOINT,
-        pullURL: PULL_ENDPOINT,
-        mutators,
-        useMemstore: process.env.NODE_ENV === "development",
+    client.enter(roomId)
+
+    const setup = async () => {
+      const room = client.getRoom(roomId)
+
+      room.updatePresence({
+        id: nanoid(),
+        point: [0, 0],
+        color: "black",
+        tempShape: null,
       })
 
-      // Connect Pusher and subscribe to room
-      const channel = new Pusher(process.env.NEXT_PUBLIC_REPLICHAT_PUSHER_KEY, {
-        cluster: process.env.NEXT_PUBLIC_REPLICHAT_PUSHER_CLUSTER,
-        authEndpoint: "/api/pusher-auth",
-      })
+      const storage = await room.getStorage<{
+        shapes: LiveList<Shape>
+      }>()
 
-      const presenceChannel = channel.subscribe(
-        "presence-" + roomId
-      ) as PresenceChannel
+      if (!storage.root.get("shapes")) {
+        storage.root.set("shapes", new LiveList<Shape>())
+      }
 
-      presenceChannel.bind("poke", () => rep.pull())
+      const live = storage.root
 
-      // See shape-utils/about-shape-utils.md
       const shapeUtils: ShapeUtilsMap = {
-        [ShapeType.Dot]: new DotUtils(rep, roomId),
-        [ShapeType.Draw]: new DrawUtils(rep, roomId),
-        [ShapeType.Rect]: new RectUtils(rep, roomId),
+        [ShapeType.Dot]: new DotUtils(live, roomId),
+        [ShapeType.Draw]: new DrawUtils(live, roomId),
+        [ShapeType.Rect]: new RectUtils(live, roomId),
       }
 
       const getShapeUtils = <T extends Shape>(type: T | T["type"]) => {
@@ -69,40 +71,38 @@ export function useSetup(roomId: string) {
         ) as ShapeUtils<T>
       }
 
-      // Shared actions
-      const actions = getActions({ rep, roomId, getShapeUtils })
+      const actions = getActions({ live, getShapeUtils })
 
-      // See tools/about-tools.md
       const tools: {
         [K in ToolType]: Tool
       } = {
-        [ToolType.Select]: new SelectTool(rep, actions, getShapeUtils),
-        [ToolType.Eraser]: new EraserTool(rep, actions, getShapeUtils),
-        [ToolType.Draw]: new DrawTool(rep, actions, getShapeUtils),
-        [ToolType.Rect]: new RectTool(rep, actions, getShapeUtils),
+        [ToolType.Select]: new SelectTool(live, actions, getShapeUtils),
+        [ToolType.Eraser]: new EraserTool(live, actions, getShapeUtils),
+        [ToolType.Draw]: new DrawTool(live, actions, getShapeUtils),
+        [ToolType.Rect]: new RectTool(live, actions, getShapeUtils),
       }
 
       setCtx({
-        rep,
-        channel: presenceChannel,
-        tools,
         roomId,
+        room,
+        live,
         getShapeUtils,
+        tools,
         actions,
       })
+    }
 
-      function leave() {
-        channel.disconnect()
-        rep.close()
-      }
+    setup()
 
-      window.addEventListener("beforeunload", leave)
+    function leave() {
+      client.leave(roomId)
+    }
 
-      return () => {
-        leave()
-        window.removeEventListener("beforeunload", leave)
-      }
-    })()
+    window.addEventListener("beforeunload", leave)
+
+    return () => {
+      window.removeEventListener("beforeunload", leave)
+    }
   }, [ctx, roomId])
 
   return ctx
