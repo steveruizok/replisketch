@@ -121,4 +121,5 @@ const CursorOverlay = styled.svg`
   position: absolute;
   width: 100%;
   height: 100%;
+  touch-action: none;
 `

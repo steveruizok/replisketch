@@ -41,6 +41,7 @@ function WithContextEditor({ roomId }: EditorProps) {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  touch-action: none;
   position: fixed;
   top: 0;
   left: 0;
