@@ -1,5 +1,5 @@
 import * as React from "react"
-import { getShapeUtils } from "frontend/shapes"
+import { getShapeUtils } from "components/shapes"
 import { Shape } from "types"
 
 interface RenderedShapeProps<T extends Shape> {

@@ -1,5 +1,5 @@
 import Vec from "@tldraw/vec"
-import { getShapeUtils } from "frontend/shapes"
+import { getShapeUtils } from "components/shapes"
 import { ShapeType, ToolType } from "types"
 import { getBoundsAtPoint, getBoundsFromTwoPoints } from "utils/bounds"
 import { Tool } from "./Tool"

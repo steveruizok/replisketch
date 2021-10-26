@@ -1,7 +1,7 @@
 import Vec from "@tldraw/vec"
 import { Shape } from "types"
 import { rep } from "./replicache"
-import { getShapeUtils } from "./shapes"
+import { getShapeUtils } from "../components/shapes"
 import {
   boundsCollide,
   getBoundsFromTwoPoints,
@@ -26,7 +26,7 @@ export async function deleteShapesAtPoint(point: number[]) {
 
   shapes
     .filter((shape: Shape) => {
-      const utils = getShapeUtils(shape)
+      const utils = getShapeUtils(shape.type)
       const bounds = utils.getBounds(shape)
       return boundsCollide(bounds, eraser) || pointInBounds(point, bounds)
     })

@@ -25,7 +25,7 @@ export class Rect extends ShapeUtil<RectShape> {
     const [w, h] = shape.size
     return (
       <path
-        d={`M ${x},${y} h ${w} v ${h} h ${-w}  Z`}
+        d={`M ${x},${y} h ${w} v ${h} h ${-w} Z`}
         stroke="black"
         strokeWidth={5}
         rx={4}

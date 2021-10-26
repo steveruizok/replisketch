@@ -1,5 +1,5 @@
 import Vec from "@tldraw/vec"
-import { getShapeUtils } from "frontend/shapes"
+import { getShapeUtils } from "components/shapes"
 import getStroke from "perfect-freehand"
 import { ShapeType, ToolType } from "types"
 import { getSvgPathFromStroke } from "utils/getSvgPathFromStroke"

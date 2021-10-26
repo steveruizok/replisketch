@@ -1,8 +1,8 @@
 import * as React from "react"
 import { deleteShapesAtPoint } from "frontend/actions"
 import { ToolType } from "types"
-import { tools } from "."
-import { Tool } from "./Tool"
+import { tools } from "../tools"
+import { Tool } from "../tools/Tool"
 
 export function useTool() {
   const rCurrentPath = React.useRef<SVGPathElement>()

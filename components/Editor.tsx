@@ -3,7 +3,7 @@ import styled from "styled-components"
 import { usePusher } from "frontend/usePusher"
 import { Canvas } from "./Canvas"
 import { Toolbar } from "./Toolbar"
-import { useTool } from "./tools/useTool"
+import { useTool } from "./hooks/useTool"
 
 export function Editor() {
   usePusher("default")
