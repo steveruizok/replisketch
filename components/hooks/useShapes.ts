@@ -1,9 +1,9 @@
 import { useSubscribe } from "replicache-react"
 import { Shape } from "types"
-import { useRep } from "./useRep"
+import { useCtx } from "./useCtx"
 
 export function useShapes() {
-  const { rep, roomId } = useRep()
+  const { rep, roomId } = useCtx()
   const shapes = useSubscribe(
     rep,
     async (tx) => {

@@ -1,7 +1,7 @@
 import * as React from "react"
 import styled from "styled-components"
 import { Shape, ToolType } from "types"
-import { useRep } from "./hooks/useRep"
+import { useCtx } from "./hooks/useCtx"
 
 interface ToolbarProps {
   roomId: string
@@ -13,7 +13,7 @@ export const Toolbar = React.memo(function Canvas({
   selectedTool,
   onToolSelect,
 }: ToolbarProps) {
-  const { rep, tools, actions } = useRep()
+  const { rep, tools, actions } = useCtx()
 
   const onToolClick = React.useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -59,6 +59,7 @@ const Container = styled.div`
   z-index: 2;
   font-size: 13px;
   font-weight: 500;
+  user-select: none;
 `
 
 const Spacer = styled.div`

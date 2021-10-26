@@ -1,6 +1,6 @@
 import { getActions } from "components/actions"
 import { GetShapeUtils } from "components/shape-utils"
-import { Rep, ToolType } from "types"
+import { Rep, Shape, ToolType } from "types"
 
 export abstract class Tool {
   abstract type: ToolType
@@ -13,22 +13,13 @@ export abstract class Tool {
     protected getShapeUtils: GetShapeUtils
   ) {}
 
-  onSelect?(currentPath: SVGPathElement): void
+  onSelect?(): void
 
-  onDeselect?(currentPath: SVGPathElement): void
+  onDeselect?(): void
 
-  onPointerDown?(
-    e: React.PointerEvent<HTMLDivElement>,
-    currentPath: SVGPathElement
-  ): void
+  onPointerDown?(e: React.PointerEvent<HTMLDivElement>): Shape | null | void
 
-  onPointerMove?(
-    e: React.PointerEvent<HTMLDivElement>,
-    currentPath: SVGPathElement
-  ): void
+  onPointerMove?(e: React.PointerEvent<HTMLDivElement>): Shape | null | void
 
-  onPointerUp?(
-    e: React.PointerEvent<HTMLDivElement>,
-    currentPath: SVGPathElement
-  ): void
+  onPointerUp?(e: React.PointerEvent<HTMLDivElement>): Shape | null | void
 }

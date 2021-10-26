@@ -35,11 +35,11 @@ export function getActions(actionCtx: ActionCtx) {
 }
 ```
 
-The action will not be available throughout the app either from the context returned by `useRep`:
+The action will not be available throughout the app either from the context returned by `useCtx`:
 
 ```ts
 function Component() {
-  const { actions } = useRep()
+  const { actions } = useCtx()
 
   //...
 }

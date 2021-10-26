@@ -87,7 +87,7 @@ async function getLastMutationId(clientID: string) {
 }
 
 async function sendPoke(roomId: string) {
-  await pusher.trigger(roomId, "poke", {})
+  await pusher.trigger(`presence-${roomId}`, "poke", {})
 }
 
 export default PushHandler

@@ -1,6 +1,7 @@
 import Vec from "@tldraw/vec"
+import { nanoid } from "nanoid"
 import getStroke from "perfect-freehand"
-import { ShapeType, ToolType } from "types"
+import { DotShape, DrawShape, Shape, ShapeType, ToolType } from "types"
 import { getSvgPathFromStroke } from "utils/getSvgPathFromStroke"
 import { Tool } from "./Tool"
 
@@ -15,7 +16,7 @@ type State =
   | {
       type: "dragging"
       origin: number[]
-      points: number[][]
+      shape: DrawShape
     }
 
 export class DrawTool extends Tool {
@@ -27,11 +28,8 @@ export class DrawTool extends Tool {
     return <span>Draw</span>
   }
 
-  onSelect(path: SVGPathElement) {
+  onSelect() {
     this.state = { type: "idle" }
-    path.setAttribute("fill", "black")
-    path.setAttribute("stroke-width", "0")
-    path.setAttribute("stroke", "none")
   }
 
   onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
@@ -46,7 +44,7 @@ export class DrawTool extends Tool {
     }
   }
 
-  onPointerMove(e: React.PointerEvent<HTMLDivElement>, path: SVGPathElement) {
+  onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const point = Vec.round([e.clientX, e.clientY])
 
     switch (this.state.type) {
@@ -62,48 +60,57 @@ export class DrawTool extends Tool {
         this.state = {
           ...this.state,
           type: "dragging",
-          points,
+          shape: {
+            id: nanoid(),
+            type: ShapeType.Draw,
+            point: [0, 0],
+            points,
+            childIndex: 1,
+          },
         }
 
-        const stroke = getSvgPathFromStroke(getStroke(points))
-        path.setAttribute("d", stroke)
-
-        break
+        return this.state.shape
       }
       case "dragging": {
-        this.state.points.push(point)
-        const stroke = getSvgPathFromStroke(getStroke(this.state.points))
-        path.setAttribute("d", stroke)
-        break
+        this.state.shape = {
+          ...this.state.shape,
+          points: [...this.state.shape.points, point],
+        }
+
+        return this.state.shape
       }
     }
   }
 
-  onPointerUp(e: React.PointerEvent<HTMLDivElement>, path: SVGPathElement) {
+  onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    const point = Vec.round([e.clientX, e.clientY])
+    let lastShape: null | Shape = null
+
     switch (this.state.type) {
       case "idle": {
         return
       }
       case "pointing": {
-        {
-          this.getShapeUtils(ShapeType.Dot).create({
-            x: e.clientX,
-            y: e.clientY,
-          })
+        lastShape = {
+          id: nanoid(),
+          type: ShapeType.Dot,
+          point,
+          childIndex: 1,
         }
+        this.actions.createShape(lastShape)
         break
       }
       case "dragging": {
-        this.getShapeUtils(ShapeType.Draw).create({
-          points: this.state.points,
-        })
+        lastShape = {
+          ...this.state.shape,
+          points: [...this.state.shape.points, point],
+        }
+        this.actions.createShape(lastShape)
+        break
       }
     }
 
-    // Clear the client path
-    path.setAttribute("d", "")
-
-    // Reset the state
     this.state = { type: "idle" }
+    return lastShape
   }
 }

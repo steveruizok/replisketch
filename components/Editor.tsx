@@ -4,6 +4,8 @@ import { Canvas } from "./Canvas"
 import { Toolbar } from "./Toolbar"
 import { useTool } from "./hooks/useTool"
 import { useSetup, repContext } from "./hooks/useSetup"
+import { LiveCursors } from "./LiveCursors"
+import { RenderedShape } from "./RenderedShape"
 
 export interface EditorProps {
   roomId: string
@@ -22,13 +24,11 @@ export function Editor({ roomId }: EditorProps) {
 }
 
 function WithContextEditor({ roomId }: EditorProps) {
-  const { rCurrentPath, selectedTool, onToolSelect, ...events } = useTool()
+  const { tempShape, selectedTool, onToolSelect, ...events } = useTool()
 
   return (
     <Container {...events}>
-      <Canvas>
-        <path ref={rCurrentPath} fill="black" />
-      </Canvas>
+      <Canvas tempShape={tempShape} />
       <Toolbar
         roomId={roomId}
         selectedTool={selectedTool}

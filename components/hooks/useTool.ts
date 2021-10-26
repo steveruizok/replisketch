@@ -1,7 +1,9 @@
+import { PresenceChannel } from "pusher-js"
 import * as React from "react"
-import { ToolType } from "types"
+import { Shape, ToolType } from "types"
+import { throttle } from "utils/throttle"
 import { Tool } from "../tools/Tool"
-import { useRep } from "./useRep"
+import { useCtx } from "./useCtx"
 
 /*
 # Tools
@@ -19,9 +21,9 @@ with the event in different ways.
 
 ## Current Path
 
-Along with the events, the hook will also forward the `currentPath`,
-an SVG path that the tool may modify while a user is drawing a new 
-shape; i.e. before the shape is committed to the document.
+Tool events can optionally return a temporary shape to be rendered
+while the user is drawing, but before being committed to the document.
+This temporary shape will be shared via the presence channel.
 
 ## Changing Tools
 
@@ -31,7 +33,9 @@ method, and the newly selected tool will run its `onSelect` method.
 */
 
 export function useTool() {
-  const { tools } = useRep()
+  const { tools, channel } = useCtx()
+
+  const [tempShape, setTempShape] = React.useState<Shape | void | null>()
 
   const [selectedTool, setSelectedTool] = React.useState<ToolType>(
     ToolType.Draw
@@ -39,47 +43,70 @@ export function useTool() {
 
   const rSelectedTool = React.useRef<Tool>(tools.draw)
 
-  const rCurrentPath = React.useRef<SVGPathElement>()
-
   const onPointerDown = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       e.currentTarget.setPointerCapture(e.pointerId)
-      rSelectedTool.current.onPointerDown?.(e, rCurrentPath.current)
+      const res = rSelectedTool.current.onPointerDown?.(e)
+      if (res !== undefined) {
+        setTempShape(res)
+        updateOnShapeChange(channel, res)
+      }
     },
-    []
+    [channel]
   )
 
   const onPointerMove = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      rSelectedTool.current.onPointerMove?.(e, rCurrentPath.current)
+      const res = rSelectedTool.current.onPointerMove?.(e)
+      if (res !== undefined) {
+        setTempShape(res)
+        updateOnShapeChange(channel, res)
+      }
     },
-    []
+    [channel]
   )
 
   const onPointerUp = React.useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       e.currentTarget.releasePointerCapture(e.pointerId)
-      rSelectedTool.current.onPointerUp?.(e, rCurrentPath.current)
+      const res = rSelectedTool.current.onPointerUp?.(e)
+      setTempShape(null) // Always clear on pointer up
+
+      if (res) {
+        // But maybe update the channel, too; and after waiting
+        // for the timeout to expire.
+        setTimeout(() => updateOnShapeChange(channel, res), 100)
+      }
     },
-    []
+    [channel]
   )
 
   const onToolSelect = React.useCallback(
     (tool: ToolType) => {
       setSelectedTool(tool)
-      rSelectedTool.current.onDeselect?.(rCurrentPath.current)
+      setTempShape(null)
+      rSelectedTool.current.onDeselect?.()
       rSelectedTool.current = tools[tool]
-      rSelectedTool.current.onSelect?.(rCurrentPath.current)
+      rSelectedTool.current.onSelect?.()
     },
     [tools]
   )
 
   return {
+    tempShape,
     selectedTool,
-    rCurrentPath,
     onToolSelect,
     onPointerDown,
     onPointerMove,
     onPointerUp,
   }
 }
+
+const updateOnShapeChange = throttle(
+  (channel: PresenceChannel, tempShape: Shape | void | null) => {
+    channel.trigger("client-changed-temp-shape", {
+      tempShape,
+    })
+  },
+  110
+)

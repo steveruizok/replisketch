@@ -12,10 +12,11 @@ import {
   GetShapeUtils,
   ShapeUtilsMap,
 } from "components/shape-utils"
-import Pusher from "pusher-js"
+import Pusher, { PresenceChannel } from "pusher-js"
 
 export type RepContext = {
   rep: Rep
+  channel: PresenceChannel
   tools: {
     [K in ToolType]: Tool
   }
@@ -44,11 +45,16 @@ export function useSetup(roomId: string) {
       })
 
       // Connect Pusher and subscribe to room
-      const pusher = new Pusher(process.env.NEXT_PUBLIC_REPLICHAT_PUSHER_KEY, {
+      const channel = new Pusher(process.env.NEXT_PUBLIC_REPLICHAT_PUSHER_KEY, {
         cluster: process.env.NEXT_PUBLIC_REPLICHAT_PUSHER_CLUSTER,
+        authEndpoint: "/api/pusher-auth",
       })
-        .subscribe(roomId)
-        .bind("poke", () => rep.pull())
+
+      const presenceChannel = channel.subscribe(
+        "presence-" + roomId
+      ) as PresenceChannel
+
+      presenceChannel.bind("poke", () => rep.pull())
 
       // See shape-utils/about-shape-utils.md
       const shapeUtils: ShapeUtilsMap = {
@@ -76,11 +82,25 @@ export function useSetup(roomId: string) {
         [ToolType.Rect]: new RectTool(rep, actions, getShapeUtils),
       }
 
-      setCtx({ rep, tools, roomId, getShapeUtils, actions })
+      setCtx({
+        rep,
+        channel: presenceChannel,
+        tools,
+        roomId,
+        getShapeUtils,
+        actions,
+      })
+
+      function leave() {
+        channel.disconnect()
+        rep.close()
+      }
+
+      window.addEventListener("beforeunload", leave)
 
       return () => {
-        pusher.disconnect()
-        rep.close()
+        leave()
+        window.removeEventListener("beforeunload", leave)
       }
     })()
   }, [ctx, roomId])

@@ -81,6 +81,13 @@ export type ActionCtx = {
   getShapeUtils: GetShapeUtils
 }
 
+export interface Client {
+  id: string
+  point: number[]
+  tempShape: null | Shape
+  color: string
+}
+
 /* --------------------- Generic -------------------- */
 
 export interface Bounds {

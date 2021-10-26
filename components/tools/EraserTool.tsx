@@ -20,11 +20,8 @@ export class EraserTool extends Tool {
     return <span>Eraser</span>
   }
 
-  onSelect(path: SVGPathElement) {
+  onSelect() {
     this.state = { type: "idle" }
-    path.setAttribute("fill", "none")
-    path.setAttribute("stroke-width", "3")
-    path.setAttribute("stroke", "black")
   }
 
   onPointerDown(e: React.PointerEvent<HTMLDivElement>) {

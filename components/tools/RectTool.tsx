@@ -1,5 +1,6 @@
 import Vec from "@tldraw/vec"
-import { ShapeType, ToolType } from "types"
+import { nanoid } from "nanoid"
+import { RectShape, Shape, ShapeType, ToolType } from "types"
 import { getBoundsAtPoint, getBoundsFromTwoPoints } from "utils/bounds"
 import { Tool } from "./Tool"
 
@@ -15,6 +16,7 @@ type State =
       type: "dragging"
       origin: number[]
       point: number[]
+      shape: RectShape
     }
 
 export class RectTool extends Tool {
@@ -26,12 +28,8 @@ export class RectTool extends Tool {
     return <span>Rect</span>
   }
 
-  onSelect(path: SVGPathElement) {
+  onSelect() {
     this.state = { type: "idle" }
-    path.setAttribute("fill", "none")
-    path.setAttribute("stroke-width", "5")
-    path.setAttribute("stroke", "black")
-    path.setAttribute("stroke-line-join", "round")
   }
 
   onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
@@ -46,81 +44,98 @@ export class RectTool extends Tool {
     }
   }
 
-  onPointerMove(e: React.PointerEvent<HTMLDivElement>, path: SVGPathElement) {
+  onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const point = Vec.round([e.clientX, e.clientY])
 
     switch (this.state.type) {
       case "idle": {
         return
       }
-
       case "pointing": {
         if (Vec.dist(point, this.state.origin) < 3) return
 
+        const bounds = getBoundsFromTwoPoints(this.state.origin, point)
+        const { minX: x, minY: y, width: w, height: h } = bounds
+
         this.state = {
           ...this.state,
           type: "dragging",
           point,
+          shape: {
+            id: nanoid(),
+            type: ShapeType.Rect,
+            point: [x, y],
+            size: [w, h],
+            childIndex: 1,
+          },
         }
 
-        this.drawRect(path)
-        break
+        return this.state.shape
       }
       case "dragging": {
+        const bounds = getBoundsFromTwoPoints(this.state.origin, point)
+        const { minX: x, minY: y, width: w, height: h } = bounds
+
         this.state = {
           ...this.state,
           type: "dragging",
           point,
+          shape: {
+            ...this.state.shape,
+            point: [x, y],
+            size: [w, h],
+          },
         }
 
-        this.drawRect(path)
-        break
+        return this.state.shape
       }
     }
   }
 
-  onPointerUp(e: React.PointerEvent<HTMLDivElement>, path: SVGPathElement) {
+  onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    const point = Vec.round([e.clientX, e.clientY])
+    let lastShape: null | Shape = null
+
     switch (this.state.type) {
       case "idle": {
         return
       }
       case "pointing": {
-        const point = Vec.round([e.clientX, e.clientY])
         const bounds = getBoundsAtPoint(point, 100)
-
-        this.getShapeUtils(ShapeType.Rect).create({
+        lastShape = {
+          id: nanoid(),
+          type: ShapeType.Rect,
           point: [bounds.minX, bounds.minY],
           size: [bounds.width, bounds.height],
-        })
+          childIndex: 1,
+        }
+        this.getShapeUtils(ShapeType.Rect).create(lastShape)
         break
       }
       case "dragging": {
-        const bounds = getBoundsFromTwoPoints(
-          this.state.origin,
-          this.state.point
-        )
-
-        this.getShapeUtils(ShapeType.Rect).create({
-          point: [bounds.minX, bounds.minY],
-          size: [bounds.width, bounds.height],
-        })
+        lastShape = this.state.shape
+        this.getShapeUtils(ShapeType.Rect).create(this.state.shape)
+        break
       }
     }
 
-    // Clear the client path
-    path.setAttribute("d", "")
-
-    // Reset the state
     this.state = { type: "idle" }
+    return lastShape
   }
 
-  private drawRect(path: SVGPathElement) {
+  private getTempShape(): RectShape {
     if (this.state.type !== "dragging") return
 
     const bounds = getBoundsFromTwoPoints(this.state.origin, this.state.point)
 
     const { minX: x, minY: y, width: w, height: h } = bounds
 
-    path.setAttribute("d", `M ${x},${y} h ${w} v ${h} h ${-w} Z`)
+    return {
+      id: "_rect",
+      type: ShapeType.Rect,
+      point: [x, y],
+      size: [w, h],
+      childIndex: 1,
+    }
   }
 }
