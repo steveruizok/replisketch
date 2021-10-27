@@ -1,7 +1,7 @@
 import Vec from "@tldraw/vec"
 import { nanoid } from "nanoid"
 import getStroke from "perfect-freehand"
-import { DotShape, DrawShape, Shape, ShapeType, ToolType } from "types"
+import { DotShape, DrawShape, Rep, Shape, ShapeType, ToolType } from "types"
 import { getSvgPathFromStroke } from "utils/getSvgPathFromStroke"
 import { Tool } from "./Tool"
 
@@ -24,15 +24,15 @@ export class DrawTool extends Tool {
 
   state: State = { type: "idle" }
 
-  Icon() {
+  Icon(): JSX.Element {
     return <span>Draw</span>
   }
 
-  onSelect() {
+  onSelect(): void {
     this.state = { type: "idle" }
   }
 
-  onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+  onPointerDown(e: React.PointerEvent<HTMLDivElement>): void {
     switch (this.state.type) {
       case "idle": {
         const point = Vec.round([e.clientX, e.clientY])
@@ -44,7 +44,7 @@ export class DrawTool extends Tool {
     }
   }
 
-  onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+  onPointerMove(e: React.PointerEvent<HTMLDivElement>): void {
     const point = Vec.round([e.clientX, e.clientY])
 
     switch (this.state.type) {
@@ -68,21 +68,17 @@ export class DrawTool extends Tool {
             childIndex: 1,
           },
         }
-
-        return this.state.shape
       }
       case "dragging": {
         this.state.shape = {
           ...this.state.shape,
           points: [...this.state.shape.points, point],
         }
-
-        return this.state.shape
       }
     }
   }
 
-  onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+  onPointerUp(e: React.PointerEvent<HTMLDivElement>): void {
     const point = Vec.round([e.clientX, e.clientY])
     let lastShape: null | Shape = null
 
@@ -111,6 +107,5 @@ export class DrawTool extends Tool {
     }
 
     this.state = { type: "idle" }
-    return lastShape
   }
 }

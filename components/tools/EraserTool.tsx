@@ -16,15 +16,15 @@ export class EraserTool extends Tool {
 
   state: State = { type: "idle" }
 
-  Icon() {
+  Icon(): JSX.Element {
     return <span>Eraser</span>
   }
 
-  onSelect() {
+  override onSelect(): void {
     this.state = { type: "idle" }
   }
 
-  onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+  override onPointerDown(e: React.PointerEvent<HTMLDivElement>): void {
     switch (this.state.type) {
       case "idle": {
         const point = Vec.round([e.clientX, e.clientY])
@@ -38,7 +38,7 @@ export class EraserTool extends Tool {
     }
   }
 
-  onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+  override onPointerMove(e: React.PointerEvent<HTMLDivElement>): void {
     const point = Vec.round([e.clientX, e.clientY])
 
     switch (this.state.type) {
@@ -57,7 +57,7 @@ export class EraserTool extends Tool {
     }
   }
 
-  onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+  override onPointerUp(e: React.PointerEvent<HTMLDivElement>): void {
     this.state = { type: "idle" }
   }
 }

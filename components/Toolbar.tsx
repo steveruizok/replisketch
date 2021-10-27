@@ -13,7 +13,7 @@ export const Toolbar = React.memo(function Canvas({
   selectedTool,
   onToolSelect,
 }: ToolbarProps) {
-  const { rep, tools, actions } = useCtx()
+  const { rep, tools, synced, actions } = useCtx()
 
   const onToolClick = React.useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -41,7 +41,9 @@ export const Toolbar = React.memo(function Canvas({
         )
       })}
       <Spacer />
-      <Title>Room ID: {roomId}</Title>
+      <Title>
+        Room ID: {roomId} {synced && " (synced)"}
+      </Title>
       <Spacer />
       <Button onPointerDown={onClearClick}>Clear</Button>
     </Container>

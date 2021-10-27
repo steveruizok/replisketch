@@ -28,11 +28,11 @@ export class RectTool extends Tool {
     return <span>Rect</span>
   }
 
-  onSelect() {
+  override onSelect() {
     this.state = { type: "idle" }
   }
 
-  onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+  override onPointerDown(e: React.PointerEvent<HTMLDivElement>): void {
     switch (this.state.type) {
       case "idle": {
         const point = Vec.round([e.clientX, e.clientY])
@@ -44,7 +44,7 @@ export class RectTool extends Tool {
     }
   }
 
-  onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+  override onPointerMove(e: React.PointerEvent<HTMLDivElement>): void {
     const point = Vec.round([e.clientX, e.clientY])
 
     switch (this.state.type) {
@@ -69,8 +69,6 @@ export class RectTool extends Tool {
             childIndex: 1,
           },
         }
-
-        return this.state.shape
       }
       case "dragging": {
         const bounds = getBoundsFromTwoPoints(this.state.origin, point)
@@ -86,13 +84,11 @@ export class RectTool extends Tool {
             size: [w, h],
           },
         }
-
-        return this.state.shape
       }
     }
   }
 
-  onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+  override onPointerUp(e: React.PointerEvent<HTMLDivElement>): void {
     const point = Vec.round([e.clientX, e.clientY])
     let lastShape: null | Shape = null
 
@@ -120,22 +116,5 @@ export class RectTool extends Tool {
     }
 
     this.state = { type: "idle" }
-    return lastShape
-  }
-
-  private getTempShape(): RectShape {
-    if (this.state.type !== "dragging") return
-
-    const bounds = getBoundsFromTwoPoints(this.state.origin, this.state.point)
-
-    const { minX: x, minY: y, width: w, height: h } = bounds
-
-    return {
-      id: "_rect",
-      type: ShapeType.Rect,
-      point: [x, y],
-      size: [w, h],
-      childIndex: 1,
-    }
   }
 }

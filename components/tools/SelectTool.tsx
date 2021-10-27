@@ -24,13 +24,13 @@ export class SelectTool extends Tool {
     return <span>Select</span>
   }
 
-  onSelect() {
+  override onSelect() {
     this.state = { type: "idle" }
   }
 
-  onPointerDown(e: React.PointerEvent<HTMLDivElement>) {}
+  override onPointerDown(e: React.PointerEvent<HTMLDivElement>): void {}
 
-  onPointerMove(e: React.PointerEvent<HTMLDivElement>) {}
+  override onPointerMove(e: React.PointerEvent<HTMLDivElement>): void {}
 
-  onPointerUp(e: React.PointerEvent<HTMLDivElement>) {}
+  override onPointerUp(e: React.PointerEvent<HTMLDivElement>): void {}
 }
